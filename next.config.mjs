@@ -3,6 +3,14 @@ const nextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    localPatterns: [
+      { pathname: "/image1.png", search: "?v=20261103-1119" },
+      { pathname: "/book.png", search: "" },
+      { pathname: "/testimonial.png", search: "" },
+      { pathname: "/read.png", search: "" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

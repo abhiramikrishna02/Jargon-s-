@@ -9,7 +9,6 @@ const ArrowRight = ({ size = 24, ...props }) => <svg viewBox="0 0 24 24" width={
 /* ───────── CENTRAL CONFIG — edit these when real details exist ───────── */
 const CONFIG = {
   purchaseUrl: "", // e.g. "https://your-checkout-link" — empty = CTAs scroll to #buy
-  previewUrl: "", // e.g. link to a sample PDF — empty = "See the book preview" scrolls to #inside
   price: "₹299",
   bookImage: "/book.png",
   privacyUrl: "", // add when the page exists
@@ -17,8 +16,6 @@ const CONFIG = {
 };
 const buyHref = CONFIG.purchaseUrl || "#buy";
 const buyProps = CONFIG.purchaseUrl ? { target: "_blank", rel: "noopener noreferrer" } : {};
-const previewHref = CONFIG.previewUrl || "#inside";
-const previewProps = CONFIG.previewUrl ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
 /* ───────── APPROVED CONTENT ───────── */
 const NAV = [
@@ -26,6 +23,14 @@ const NAV = [
   ["What's Inside", "#inside"],
   ["Author", "#about"],
   ["FAQ", "#faq"],
+];
+const REVIEWS = [
+  "A clear, practical way to make sense of business terms I kept hearing but rarely understood.",
+  "The examples made the concepts click. I found myself connecting ideas to my own work.",
+  "It feels like having a friendly reference beside you while learning how a business works.",
+  "Straightforward explanations without assuming you already know the jargon.",
+  "I like that I can read a chapter or just look up one term when I need it.",
+  "A useful starting point for anyone curious about the conversations happening around business.",
 ];
 const JARGON = ["CAC", "MVP", "EBITDA", "Burn rate"];
 const CHAPTERS = [
@@ -118,14 +123,14 @@ const Mark = ({ children }) => (
   </span>
 );
 const Em = ({ children }) => (
-  <em className="italic underline decoration-[#a2bd2d] [text-decoration-thickness:0.07em] [text-underline-offset:0.16em]">{children}</em>
+  <em className="not-italic underline decoration-[#a2bd2d] [text-decoration-thickness:0.07em] [text-underline-offset:0.16em]">{children}</em>
 );
 
 function BookImage({ priority = false, className = "" }) {
   const [failed, setFailed] = useState(false);
   if (failed)
     return (
-      <div role="img" aria-label="Founderverse book mockup placeholder" className="flex aspect-[3/4] w-full max-w-[420px] flex-col items-center justify-center border border-dashed border-[#a2bd2d]/60 bg-white p-6 text-center">
+      <div role="img" aria-label="Founderverse book cover" className="flex aspect-[3/4] w-full max-w-[420px] flex-col items-center justify-center border border-dashed border-[#a2bd2d]/60 bg-white p-6 text-center">
         <p className="f-d text-4xl text-[#080808]">BOOK MOCKUP</p>
         <p className="mt-2 text-sm text-[#141414]/70">Add your 3D mockup PNG at <code className="text-[#080808]">public/book.png</code></p>
       </div>
@@ -189,12 +194,24 @@ const FaqItem = ({ q, a, i }) => {
 const Home = () => {
   const [scrolled, setScrolled] = useState(false);
   const [sticky, setSticky] = useState(false);
+  const [navVisible, setNavVisible] = useState(true);
   const [open, setOpen] = useState(false);
+  const openRef = useRef(open);
   const [year, setYear] = useState(null);
+  openRef.current = open;
 
   useEffect(() => {
     setYear(new Date().getFullYear());
-    const on = () => { setScrolled(window.scrollY > 24); setSticky(window.scrollY > 700); };
+    let previousY = window.scrollY;
+    const on = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 24);
+      const nextSectionTop = document.getElementById("why-business")?.offsetTop ?? 700;
+      setSticky(currentY >= nextSectionTop - 80);
+      if (openRef.current || currentY < 80 || currentY < previousY - 4) setNavVisible(true);
+      else if (currentY > previousY + 4) setNavVisible(false);
+      previousY = currentY;
+    };
     on();
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
@@ -218,7 +235,7 @@ const Home = () => {
       `}</style>
 
       {/* NAVBAR — floating pill */}
-      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5">
+      <header className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-300 sm:px-5 ${navVisible || open ? "translate-y-0" : "-translate-y-full"}`}>
         <div className="mx-auto max-w-6xl">
           <nav className={`flex h-14 items-center justify-between rounded-full border pl-5 pr-2 transition duration-300 sm:pl-6 ${scrolled || open ? "border-[#080808]/10 bg-white/80 shadow-[0_14px_40px_-22px_rgba(8,8,8,0.45)] backdrop-blur-xl" : "border-transparent bg-transparent"}`} aria-label="Main">
             <a href="#top" className="f-d text-xl sm:text-2xl">FOUNDERVERSE</a>
@@ -244,14 +261,18 @@ const Home = () => {
           <div aria-hidden="true" className="pointer-events-none absolute -right-24 bottom-0 -z-10 h-[360px] w-[360px] rounded-full bg-[#FFE500]/20 blur-3xl" />
           <div className="mx-auto grid max-w-7xl items-center gap-6 px-5 md:px-8 lg:grid-cols-[.95fr_1.05fr] lg:gap-10">
             <R className="relative">
-              <Stage ring className="max-w-[290px] sm:max-w-[380px] lg:max-w-[470px]"><BookImage priority /></Stage>
+              <Stage className="max-w-[290px] sm:max-w-[380px] lg:max-w-[470px]"><BookImage priority /></Stage>
             </R>
             <R delay={120}>
-              <p className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-[#080808]/10 bg-white/80 px-4 py-2 text-[11px] font-semibold leading-snug tracking-[0.18em] shadow-[0_10px_30px_-20px_rgba(8,8,8,0.4)] backdrop-blur sm:text-xs"><span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-[#a2bd2d]" />FOUNDERVERSE · BY HASHIR USMAN</p>
               <h1 className="f-s text-[clamp(2.5rem,5.6vw,4.8rem)]" style={{ lineHeight: 1.03 }}>You want to understand <Mark>business.</Mark></h1>
               <p className="mt-4 text-xl font-semibold leading-snug sm:text-2xl">Start by understanding what everyone is talking about.</p>
-              <ul className="mt-5 flex flex-wrap gap-2" aria-label="Examples of business jargon">
-                {JARGON.map((j) => (<li key={j} className="rounded-full border border-[#080808]/15 bg-white px-3.5 py-1.5 text-sm font-semibold text-[#080808] shadow-[0_6px_16px_-10px_rgba(8,8,8,0.35)]">{j}.</li>))}
+              <ul className="mt-5 flex flex-wrap gap-2.5" aria-label="Examples of business jargon">
+                {JARGON.map((j) => (
+                  <li key={j} className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border border-[#080808] bg-[#080808] px-4 py-2 text-sm font-semibold tracking-[0.015em] text-white shadow-[0_10px_22px_-14px_rgba(8,8,8,0.6)] transition duration-300 hover:-translate-y-0.5 hover:border-[#a2bd2d] hover:bg-[#171914] sm:min-h-12 sm:px-5 sm:text-[15px]">
+                    <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#a2bd2d] shadow-[0_0_0_3px_rgba(162,189,45,0.16)] transition group-hover:shadow-[0_0_0_5px_rgba(162,189,45,0.22)]" />
+                    <span>{j}<span className="text-[#a2bd2d]">.</span></span>
+                  </li>
+                ))}
               </ul>
               <p className="f-s mt-5 text-xl !leading-snug text-[#080808] sm:text-2xl">Understand the ideas behind the terms.</p>
               <p className="mt-2 max-w-xl text-[17px] leading-[1.65] text-[#141414]/80 sm:text-lg">200 essential business concepts, explained through simple language and practical examples.</p>
@@ -267,7 +288,7 @@ const Home = () => {
         </section>
 
         {/* 2 · STOP LOOKING UP WORDS */}
-        <Sec alt>
+        <Sec id="why-business" alt className="!py-8 md:!py-10">
           <div className="grid items-center gap-8 lg:grid-cols-[1.2fr_.8fr] lg:gap-12">
             <R>
               <H2>Stop looking up words. <Em>Start connecting ideas.</Em></H2>
@@ -277,7 +298,16 @@ const Home = () => {
               </div>
             </R>
             <R delay={120}>
-              <Stage className="max-w-[270px] -rotate-3 transition duration-500 hover:rotate-0"><BookImage /></Stage>
+              <div className="mx-auto w-full max-w-[280px] -rotate-2 transition duration-500 hover:rotate-0">
+                <Image
+                  src="/image1.png?v=20261103-1119"
+                  alt="A stack of Founderverse business jargon books"
+                  width={1122}
+                  height={1402}
+                  sizes="(max-width: 1024px) 75vw, 22vw"
+                  className="h-auto w-full rounded-[18px] drop-shadow-[0_24px_32px_rgba(8,8,8,0.18)]"
+                />
+              </div>
             </R>
           </div>
         </Sec>
@@ -287,9 +317,6 @@ const Home = () => {
           <div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
             <R className="lg:sticky lg:top-28 lg:self-start">
               <H2>Here's what <Em>understanding</Em> looks like.</H2>
-              <div className="mt-6 hidden lg:block">
-                <Cta secondary href={previewHref} {...previewProps}>SEE THE BOOK PREVIEW</Cta>
-              </div>
             </R>
             <R delay={100}>
               <article className="relative overflow-hidden rounded-[28px] border border-[#080808]/10 bg-white shadow-[0_40px_80px_-48px_rgba(8,8,8,0.6)]">
@@ -304,12 +331,9 @@ const Home = () => {
                   <p className="mt-4 text-[17px] leading-[1.65] text-[#141414]/80">That's what acquiring each customer costs.</p>
                   <p className="mt-3 text-[17px] leading-[1.65] text-[#141414]/80">Now you can ask the useful question:</p>
                   <p className="f-s mt-3 rounded-2xl border border-[#a2bd2d]/40 bg-[#DAE6A6]/55 p-5 text-lg !leading-snug text-[#080808]">“Does that cost make sense for my business?”</p>
-                  <p className="mt-5 border-t border-[#080808]/10 pt-4 text-base italic leading-[1.65] text-[#141414]/80">The abbreviation is the starting point. The business thinking is what matters.</p>
+                  <p className="mt-5 border-t border-[#080808]/10 pt-4 text-base leading-[1.65] text-[#141414]/80">The abbreviation is the starting point. The business thinking is what matters.</p>
                 </div>
               </article>
-              <div className="mt-6 lg:hidden">
-                <Cta secondary href={previewHref} {...previewProps}>SEE THE BOOK PREVIEW</Cta>
-              </div>
             </R>
           </div>
         </Sec>
@@ -341,19 +365,68 @@ const Home = () => {
           <R>
             <div className="relative overflow-hidden rounded-[28px] border border-[#080808]/10 bg-gradient-to-br from-white via-white to-[#DAE6A6]/40 p-6 shadow-[0_40px_80px_-50px_rgba(8,8,8,0.55)] md:p-10">
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#a2bd2d] via-[#FFE500] to-[#a2bd2d]" />
-              <div className="relative grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-14">
-                <H2 sm>You can Google the terms. <Em>This puts them together.</Em></H2>
-                <div className="space-y-3 border-[#080808]/10 text-[17px] leading-[1.7] text-[#141414]/80 sm:text-[18px] lg:border-l lg:pl-10">
-                  <p>Clear explanations. Practical examples. A consistent structure.</p>
-                  <p>Written by <strong className="font-semibold text-[#080808]">Hashir Usman</strong>, whose work spans venture development, business strategy, brand building and operations.</p>
-                  <p className="f-s !leading-snug text-xl text-[#080808] sm:text-2xl">For people who want to understand business—not just recognise the vocabulary.</p>
+              <div className="relative grid items-center gap-7 lg:grid-cols-[.9fr_1.1fr] lg:gap-12">
+                <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[18px] border border-[#080808]/10 shadow-[0_24px_50px_-34px_rgba(8,8,8,0.5)]">
+                  <Image
+                    src="/read.png"
+                    alt="A reader enjoying 200 Industry Jargons Explained"
+                    width={1207}
+                    height={1303}
+                    sizes="(max-width: 1024px) 90vw, 38vw"
+                    className="h-auto w-full object-cover"
+                  />
+                </div>
+                <div>
+                  <H2 sm>You can Google the terms. <Em>This puts them together.</Em></H2>
+                  <div className="mt-5 space-y-3 border-[#080808]/10 text-[17px] leading-[1.7] text-[#141414]/80 sm:text-[18px] lg:border-l lg:pl-8">
+                    <p>Clear explanations. Practical examples. A consistent structure.</p>
+                    <p>Written by <strong className="font-semibold text-[#080808]">Hashir Usman</strong>, whose work spans venture development, business strategy, brand building and operations.</p>
+                    <p className="f-s !leading-snug text-xl text-[#080808] sm:text-2xl">For people who want to understand business—not just recognise the vocabulary.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </R>
         </Sec>
 
-        {/* 6 · PURCHASE */}
+        {/* 6 · TESTIMONIALS */}
+        <Sec id="reviews">
+          <R><div className="text-center">
+            <H2 center>What our readers say.</H2>
+          </div></R>
+          <ol className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {REVIEWS.map((quote, i) => (
+              <li key={quote} className="relative min-w-0">
+                <R delay={i * 65} className="h-full">
+                  <div aria-hidden="true" className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-[22px] border border-[#a2bd2d]/40 bg-[#DAE6A6]/35" />
+                  <figure className="relative flex h-full min-h-[300px] flex-col rounded-[18px] border border-[#080808]/10 bg-white p-5 shadow-[0_24px_55px_-38px_rgba(8,8,8,0.35)] sm:p-6">
+                    <figcaption className="flex items-center gap-4">
+                      <Image
+                        src="/testimonial.png"
+                        alt="Founderverse reader"
+                        width={72}
+                        height={72}
+                        sizes="72px"
+                        className="h-[68px] w-[68px] shrink-0 rounded-full border border-[#080808]/10 object-cover object-[50%_22%]"
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-base font-semibold text-[#080808]">Founderverse reader</span>
+                        <span className="mt-1 block text-sm text-[#141414]/55">Founderverse reader</span>
+                      </span>
+                    </figcaption>
+                    <blockquote className="mt-6 flex-1 text-[16px] leading-[1.65] text-[#141414]/80">“{quote}”</blockquote>
+                    <div className="mt-6 flex items-center gap-3 border-t border-[#080808]/10 pt-4">
+                      <span aria-label="Five-star rating" className="text-lg tracking-[0.12em] text-[#748b16]">★★★★★</span>
+                      <span className="text-sm font-semibold text-[#080808]">5.0</span>
+                    </div>
+                  </figure>
+                </R>
+              </li>
+            ))}
+          </ol>
+        </Sec>
+
+        {/* 7 · PURCHASE */}
         <Sec id="buy" alt>
           <R>
             <div className="relative grid items-center gap-6 overflow-hidden rounded-[28px] bg-[#080808] p-6 text-white shadow-[0_40px_90px_-40px_rgba(8,8,8,0.75)] md:p-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-12 lg:p-12">
@@ -366,16 +439,13 @@ const Home = () => {
                 <ul className="mt-5 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
                   {INSIDE.map((t) => (<li key={t} className="flex items-start gap-3 text-[16px] leading-snug text-white"><span aria-hidden="true" className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#a2bd2d] text-xs font-bold text-[#080808]">✓</span>{t}</li>))}
                 </ul>
-                <div className="mt-6 border-t border-white/15 pt-5">
-                  <Cta tone="dark" className="w-full sm:w-auto">GET THE COMPLETE BOOK — {CONFIG.price} <Arr /></Cta>
-                  <p className="mt-3 text-sm text-[#B8B8B8]">Digital PDF · One-time purchase · No subscription</p>
-                </div>
+                <p className="mt-6 border-t border-white/15 pt-5 text-sm text-[#B8B8B8]">Digital PDF · One-time purchase · No subscription</p>
               </div>
             </div>
           </R>
         </Sec>
 
-        {/* 7 · FAQ */}
+        {/* 8 · FAQ */}
         <Sec id="faq">
           <div className="grid gap-6 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
             <R className="lg:sticky lg:top-28 lg:self-start"><H2Dot>A few things before you buy.</H2Dot></R>
@@ -383,7 +453,7 @@ const Home = () => {
           </div>
         </Sec>
 
-        {/* 8 · FINAL CTA */}
+        {/* 9 · FINAL CTA */}
         <section className="bg-white px-3 pb-12 sm:px-5 md:pb-16">
           <R>
             <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[28px] bg-[#a2bd2d] px-6 py-12 text-center shadow-[0_40px_90px_-50px_rgba(120,145,20,0.9)] md:px-12 md:py-16">
@@ -394,7 +464,6 @@ const Home = () => {
               <div aria-hidden="true" className="pointer-events-none absolute -bottom-12 -right-4 h-48 w-48 rounded-full border border-[#080808]/10" />
               <div className="relative">
                 <h2 className="f-s mx-auto max-w-4xl text-[clamp(2.1rem,5vw,4rem)]">Understand more of the next business <Mark>conversation.</Mark></h2>
-                <div className="mt-7"><Cta tone="ink">GET THE BOOK — {CONFIG.price} <Arr ink /></Cta></div>
               </div>
             </div>
           </R>
@@ -418,7 +487,6 @@ const Home = () => {
           <div>
             <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#141414]/50">Get the book</h2>
             <p className="mt-4 text-sm leading-relaxed text-[#141414]/70">Keep a clear, organised business reference close whenever a new term comes up.</p>
-            <Cta className="mt-5 !min-h-11 !px-5 !py-2.5 !text-xs">Get the Book · {CONFIG.price} <Arr /></Cta>
           </div>
         </div>
         <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-[#080808]/10 pt-5 text-xs text-[#141414]/55 sm:flex-row sm:items-center sm:justify-between">
@@ -428,7 +496,7 @@ const Home = () => {
       </footer>
 
       {/* FIXED DESKTOP BUY BUTTON */}
-      <div className="fixed bottom-6 right-6 z-40 hidden md:block">
+      <div className={`fixed bottom-6 right-6 z-40 hidden transition-all duration-300 md:block ${sticky ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[150%] opacity-0"}`}>
         <Cta className="shadow-[0_16px_40px_-12px_rgba(8,8,8,0.45)]">Get the Book · {CONFIG.price} <Arr /></Cta>
       </div>
 
