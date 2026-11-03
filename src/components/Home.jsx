@@ -126,7 +126,7 @@ const Em = ({ children }) => (
   <em className="not-italic underline decoration-[#a2bd2d] [text-decoration-thickness:0.07em] [text-underline-offset:0.16em]">{children}</em>
 );
 
-function BookImage({ priority = false, className = "" }) {
+function BookImage({ loading = "lazy", className = "" }) {
   const [failed, setFailed] = useState(false);
   if (failed)
     return (
@@ -141,7 +141,7 @@ function BookImage({ priority = false, className = "" }) {
       alt="Founderverse – 200 Industry Jargons Explained, 3D book mockup"
       width={720}
       height={900}
-      priority={priority}
+      loading={loading}
       onError={() => setFailed(true)}
       className={`h-auto w-full drop-shadow-[0_30px_36px_rgba(8,8,8,0.4)] ${className}`}
     />
@@ -241,7 +241,7 @@ const Home = () => {
           <div aria-hidden="true" className="pointer-events-none absolute -right-24 bottom-0 -z-10 h-[360px] w-[360px] rounded-full bg-[#FFE500]/20 blur-3xl" />
           <div className="mx-auto grid max-w-7xl items-center gap-6 px-5 md:px-8 lg:grid-cols-[.95fr_1.05fr] lg:gap-10">
             <R className="relative">
-              <Stage className="max-w-[290px] sm:max-w-[380px] lg:max-w-[470px]"><BookImage priority /></Stage>
+              <Stage className="max-w-[290px] sm:max-w-[380px] lg:max-w-[470px]"><BookImage loading="eager" /></Stage>
             </R>
             <R delay={120}>
               <h1 className="f-s text-[clamp(2.5rem,5.6vw,4.8rem)]" style={{ lineHeight: 1.03 }}>You want to understand <Mark>business.</Mark></h1>
@@ -346,12 +346,12 @@ const Home = () => {
             <div className="relative overflow-hidden rounded-[28px] border border-[#080808]/10 bg-gradient-to-br from-white via-white to-[#DAE6A6]/40 p-6 shadow-[0_40px_80px_-50px_rgba(8,8,8,0.55)] md:p-10">
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#a2bd2d] via-[#FFE500] to-[#a2bd2d]" />
               <div className="relative grid items-center gap-7 lg:grid-cols-[.9fr_1.1fr] lg:gap-12">
-                <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[18px] border border-[#080808]/10 shadow-[0_24px_50px_-34px_rgba(8,8,8,0.5)]">
+                <div className="mx-auto w-full max-w-[390px] overflow-hidden rounded-[18px] border border-[#080808]/10 shadow-[0_24px_50px_-34px_rgba(8,8,8,0.5)]">
                   <Image
-                    src="/read.png"
-                    alt="A reader enjoying 200 Industry Jargons Explained"
-                    width={1207}
-                    height={1303}
+                    src="/hashir.png"
+                    alt="Hashir Usman speaking at an event"
+                    width={1121}
+                    height={1403}
                     sizes="(max-width: 1024px) 90vw, 38vw"
                     className="h-auto w-full object-cover"
                   />

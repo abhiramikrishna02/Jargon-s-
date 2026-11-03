@@ -8,7 +8,7 @@ const nextConfig = {
       { pathname: "/image1.png", search: "?v=20261103-1119" },
       { pathname: "/book.png", search: "" },
       { pathname: "/testimonial.png", search: "" },
-      { pathname: "/read.png", search: "" },
+      { pathname: "/hashir.png", search: "" },
       { pathname: "/reviews/**", search: "" },
     ],
   },
