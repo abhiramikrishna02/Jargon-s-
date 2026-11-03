@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
 
-const Menu = (props) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" {...props}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
-const X = (props) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" {...props}><path d="m18 6-12 12M6 6l12 12" /></svg>;
 const ArrowRight = ({ size = 24, ...props }) => <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M5 12h14M12 5l7 7-7 7" /></svg>;
 
 /* ───────── CENTRAL CONFIG — edit these when real details exist ───────── */
@@ -217,8 +217,6 @@ const Home = () => {
     return () => window.removeEventListener("scroll", on);
   }, []);
 
-  const legal = (label, url) => url ? <a href={url} className="hover:text-[#080808]">{label}</a> : <span title="Add URL in CONFIG">{label}</span>;
-
   return (
     <div className="relative overflow-x-clip bg-white font-[Inter,DM_Sans,sans-serif] text-[#080808] antialiased">
       <style>{`
@@ -234,25 +232,7 @@ const Home = () => {
         @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}*{transition:none!important}}
       `}</style>
 
-      {/* NAVBAR — floating pill */}
-      <header className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-300 sm:px-5 ${navVisible || open ? "translate-y-0" : "-translate-y-full"}`}>
-        <div className="mx-auto max-w-6xl">
-          <nav className={`flex h-14 items-center justify-between rounded-full border pl-5 pr-2 transition duration-300 sm:pl-6 ${scrolled || open ? "border-[#080808]/10 bg-white/80 shadow-[0_14px_40px_-22px_rgba(8,8,8,0.45)] backdrop-blur-xl" : "border-transparent bg-transparent"}`} aria-label="Main">
-            <a href="#top" className="f-d text-xl sm:text-2xl">FOUNDERVERSE</a>
-            <ul className="hidden items-center gap-7 lg:flex">
-              {NAV.map(([l, h]) => (<li key={h}><a href={h} className="text-sm font-medium text-[#141414]/75 transition hover:text-[#080808]">{l}</a></li>))}
-              <li><Cta className="!min-h-10 !px-5 !py-2 !text-xs">Get the Book · {CONFIG.price}</Cta></li>
-            </ul>
-            <button className="grid h-10 w-10 place-items-center rounded-full lg:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
-          </nav>
-          {open && (
-            <div className="mt-2 rounded-3xl border border-[#080808]/10 bg-white p-5 shadow-[0_24px_60px_-30px_rgba(8,8,8,0.5)] lg:hidden">
-              <ul>{NAV.map(([l, h]) => (<li key={h}><a href={h} onClick={() => setOpen(false)} className="block border-b border-[#080808]/10 py-4 text-lg font-medium">{l}</a></li>))}</ul>
-              <Cta onClick={() => setOpen(false)} className="mt-5 w-full">Get the Book · {CONFIG.price}</Cta>
-            </div>
-          )}
-        </div>
-      </header>
+      <Navbar navItems={NAV} price={CONFIG.price} buyHref={buyHref} buyProps={buyProps} scrolled={scrolled} visible={navVisible} open={open} setOpen={setOpen} />
 
       <main id="top" className="relative">
         {/* 1 · HERO */}
@@ -471,30 +451,7 @@ const Home = () => {
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-[#080808]/10 bg-[#fafaf7] px-5 py-12 md:px-8 md:py-14">
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.4fr_.8fr_.8fr] md:gap-12">
-          <div>
-            <a href="#top" className="f-d text-3xl tracking-wide">JARGONS</a>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#141414]/70">A practical guide to understanding the language of business, one clear explanation at a time.</p>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-[#141414]/55">Digital PDF · 200 terms · 8 chapters</p>
-          </div>
-          <nav aria-label="Footer navigation">
-            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#141414]/50">Explore</h2>
-            <ul className="mt-4 space-y-3 text-sm text-[#141414]/75">
-              {NAV.map(([label, href]) => (<li key={href}><a href={href} className="transition hover:text-[#080808]">{label}</a></li>))}
-            </ul>
-          </nav>
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#141414]/50">Get the book</h2>
-            <p className="mt-4 text-sm leading-relaxed text-[#141414]/70">Keep a clear, organised business reference close whenever a new term comes up.</p>
-          </div>
-        </div>
-        <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-[#080808]/10 pt-5 text-xs text-[#141414]/55 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year ?? ""} Jargons. All rights reserved.</p>
-          <div className="flex gap-5">{CONFIG.privacyUrl && legal("Privacy Policy", CONFIG.privacyUrl)}{CONFIG.termsUrl && legal("Terms & Conditions", CONFIG.termsUrl)}</div>
-        </div>
-      </footer>
+      <Footer navItems={NAV} year={year} privacyUrl={CONFIG.privacyUrl} termsUrl={CONFIG.termsUrl} />
 
       {/* FIXED DESKTOP BUY BUTTON */}
       <div className={`fixed bottom-6 right-6 z-40 hidden transition-all duration-300 md:block ${sticky ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[150%] opacity-0"}`}>
