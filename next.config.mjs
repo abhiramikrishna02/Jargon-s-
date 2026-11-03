@@ -9,6 +9,7 @@ const nextConfig = {
       { pathname: "/book.png", search: "" },
       { pathname: "/testimonial.png", search: "" },
       { pathname: "/read.png", search: "" },
+      { pathname: "/reviews/**", search: "" },
     ],
   },
   turbopack: {

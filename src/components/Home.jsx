@@ -25,12 +25,12 @@ const NAV = [
   ["FAQ", "#faq"],
 ];
 const REVIEWS = [
-  "A clear, practical way to make sense of business terms I kept hearing but rarely understood.",
-  "The examples made the concepts click. I found myself connecting ideas to my own work.",
-  "It feels like having a friendly reference beside you while learning how a business works.",
-  "Straightforward explanations without assuming you already know the jargon.",
-  "I like that I can read a chapter or just look up one term when I need it.",
-  "A useful starting point for anyone curious about the conversations happening around business.",
+  { quote: "Funny thing is, I've been using words like CAC and LTV in meetings without being fully sure about them. Now I realise I was just managing somehow.", image: "/reviews/rashi.png", name: "Rashid", city: "Bengaluru", rating: "4.9" },
+  { quote: "I usually lose interest when business books get too technical. This one is quite easy to read. You can just open a chapter, understand a few things and leave it there.", image: "/reviews/sandra.png", name: "Sandra", city: "Chennai", rating: "4.8" },
+  { quote: "I actually bought it for the startup terms. But the finance part was better than I expected. Especially the bits about cash flow and margins. That was useful.", image: "/reviews/nawaf.png", name: "Nawaf", city: "Kochi", rating: "5.0" },
+  { quote: "Coming from a non-commerce background, I always felt a bit lost with these terms. I liked that the book doesn't make you feel like you're supposed to know everything already.", image: "/reviews/jaishu.jpeg", name: "Jaishma", city: "Bengaluru", rating: "4.7" },
+  { quote: "To be fair, I've not finished the book. I read whatever is relevant at that time. The index makes it easy, so I'm not complaining.", image: "/reviews/hashim.png", name: "Hashim", city: "Hyderabad", rating: "4.6" },
+  { quote: "Thought I knew most of the marketing terms because I work around that stuff. Apparently, knowing the full form and knowing the actual meaning are two different things.", image: "/reviews/shebin.png", name: "Shebin", city: "Chennai", rating: "4.9" },
 ];
 const JARGON = ["CAC", "MVP", "EBITDA", "Burn rate"];
 const CHAPTERS = [
@@ -393,31 +393,32 @@ const Home = () => {
         <Sec id="reviews">
           <R><div className="text-center">
             <H2 center>What our readers say.</H2>
+            <p className="mx-auto mt-3 max-w-4xl text-sm leading-relaxed text-[#141414]/60 sm:text-base">Illustrative testimonial copy for the website. These are fictional examples, not verified customer statements.</p>
           </div></R>
           <ol className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {REVIEWS.map((quote, i) => (
-              <li key={quote} className="relative min-w-0">
+            {REVIEWS.map(({ quote, image, name, city, rating }, i) => (
+              <li key={image} className="relative min-w-0">
                 <R delay={i * 65} className="h-full">
                   <div aria-hidden="true" className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-[22px] border border-[#a2bd2d]/40 bg-[#DAE6A6]/35" />
                   <figure className="relative flex h-full min-h-[300px] flex-col rounded-[18px] border border-[#080808]/10 bg-white p-5 shadow-[0_24px_55px_-38px_rgba(8,8,8,0.35)] sm:p-6">
                     <figcaption className="flex items-center gap-4">
                       <Image
-                        src="/testimonial.png"
-                        alt="Founderverse reader"
+                        src={image}
+                        alt={`${name} portrait`}
                         width={72}
                         height={72}
                         sizes="72px"
                         className="h-[68px] w-[68px] shrink-0 rounded-full border border-[#080808]/10 object-cover object-[50%_22%]"
                       />
                       <span className="min-w-0">
-                        <span className="block text-base font-semibold text-[#080808]">Founderverse reader</span>
-                        <span className="mt-1 block text-sm text-[#141414]/55">Founderverse reader</span>
+                        <span className="block text-base font-semibold text-[#080808]">{name}</span>
+                        <span className="mt-1 block text-sm text-[#141414]/55">{city}</span>
                       </span>
                     </figcaption>
                     <blockquote className="mt-6 flex-1 text-[16px] leading-[1.65] text-[#141414]/80">“{quote}”</blockquote>
                     <div className="mt-6 flex items-center gap-3 border-t border-[#080808]/10 pt-4">
-                      <span aria-label="Five-star rating" className="text-lg tracking-[0.12em] text-[#748b16]">★★★★★</span>
-                      <span className="text-sm font-semibold text-[#080808]">5.0</span>
+                      <span aria-label={`${rating} out of 5 stars`} className="text-lg tracking-[0.12em] text-[#748b16]">★★★★★</span>
+                      <span className="text-sm font-semibold text-[#080808]">{rating}</span>
                     </div>
                   </figure>
                 </R>
