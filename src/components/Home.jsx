@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { useTracking } from "./TrackingProvider";
 
 const ArrowRight = ({ size = 24, ...props }) => <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M5 12h14M12 5l7 7-7 7" /></svg>;
 
@@ -75,6 +76,11 @@ const Svg = ({ n, className = "" }) => (
 
 /* ───────── small pieces ───────── */
 const Cta = ({ children, secondary, tone, href = buyHref, className = "", ...rest }) => {
+  const { track } = useTracking();
+  const onClick = (event) => {
+    rest.onClick?.(event);
+    track("buy_click", { button_location: rest["data-tracking-location"] || "content" }, true);
+  };
   const look = secondary
     ? "border border-[#080808]/20 bg-white/60 text-[#080808] backdrop-blur hover:border-[#080808] hover:bg-[#080808] hover:text-white"
     : tone === "dark"
@@ -87,6 +93,7 @@ const Cta = ({ children, secondary, tone, href = buyHref, className = "", ...res
       href={href}
       {...(href === buyHref ? buyProps : {})}
       {...rest}
+      onClick={onClick}
       className={`group inline-flex min-h-12 items-center justify-center gap-3 rounded-full px-7 py-3 text-[13px] font-semibold uppercase tracking-[0.1em] transition duration-300 hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#080808] ${look} ${className}`}
     >
       {children}
@@ -192,6 +199,7 @@ const FaqItem = ({ q, a, i }) => {
 
 /* ───────── page ───────── */
 const Home = () => {
+  const { track, consent } = useTracking();
   const [scrolled, setScrolled] = useState(false);
   const [sticky, setSticky] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
@@ -217,6 +225,22 @@ const Home = () => {
     return () => window.removeEventListener("scroll", on);
   }, []);
 
+  useEffect(() => {
+    if (consent !== "granted") return;
+    const ebookSection = document.getElementById("ebook-product-card");
+    if (!ebookSection || typeof IntersectionObserver === "undefined") return;
+    let viewed = false;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!viewed && entry.isIntersecting) {
+        viewed = true;
+        track("ViewContent", { content_name: "200 Industry Jargons Explained", content_type: "ebook" });
+        observer.disconnect();
+      }
+    }, { threshold: 0.25 });
+    observer.observe(ebookSection);
+    return () => observer.disconnect();
+  }, [consent, track]);
+
   return (
     <div className="relative overflow-x-clip bg-white font-[Inter,DM_Sans,sans-serif] text-[#080808] antialiased">
       <style>{`
@@ -232,7 +256,7 @@ const Home = () => {
         @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}*{transition:none!important}}
       `}</style>
 
-      <Navbar navItems={NAV} price={CONFIG.price} buyHref={buyHref} buyProps={buyProps} scrolled={scrolled} visible={navVisible} open={open} setOpen={setOpen} />
+      <Navbar navItems={NAV} price={CONFIG.price} buyHref={buyHref} buyProps={buyProps} scrolled={scrolled} visible={navVisible} open={open} setOpen={setOpen} onBuyClick={(location) => track("buy_click", { button_location: location }, true)} />
 
       <main id="top" className="relative">
         {/* 1 · HERO */}
@@ -260,7 +284,7 @@ const Home = () => {
                 {[["200", "terms"], ["8", "chapters"], ["98", "pages"]].map(([n, l]) => (<div key={l} className="px-5"><p className="f-d inline-block border-b-4 border-[#FFE500] text-3xl sm:text-4xl">{n}</p><p className="mt-1 text-sm text-[#141414]/75">{l}</p></div>))}
               </div>
               <div className="mt-6">
-                <Cta>GET THE BOOK — {CONFIG.price} <Arr /></Cta>
+                <Cta data-tracking-location="hero">GET THE BOOK — {CONFIG.price} <Arr /></Cta>
               </div>
               <p className="mt-3 text-sm text-[#141414]/75">One-time purchase · Digital PDF</p>
             </R>
@@ -410,7 +434,7 @@ const Home = () => {
         {/* 7 · PURCHASE */}
         <Sec id="buy" alt>
           <R>
-            <div className="relative grid items-center gap-6 overflow-hidden rounded-[28px] bg-[#080808] p-6 text-white shadow-[0_40px_90px_-40px_rgba(8,8,8,0.75)] md:p-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-12 lg:p-12">
+            <div id="ebook-product-card" className="relative grid items-center gap-6 overflow-hidden rounded-[28px] bg-[#080808] p-6 text-white shadow-[0_40px_90px_-40px_rgba(8,8,8,0.75)] md:p-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-12 lg:p-12">
               <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#a2bd2d]/20 blur-3xl" />
               <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 left-10 h-56 w-56 rounded-full border border-white/10" />
               <Stage className="max-w-[270px]"><BookImage /></Stage>
@@ -455,13 +479,13 @@ const Home = () => {
 
       {/* FIXED DESKTOP BUY BUTTON */}
       <div className={`fixed bottom-6 right-6 z-40 hidden transition-all duration-300 md:block ${sticky ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[150%] opacity-0"}`}>
-        <Cta className="shadow-[0_16px_40px_-12px_rgba(8,8,8,0.45)]">Get the Book · {CONFIG.price} <Arr /></Cta>
+        <Cta data-tracking-location="sticky_desktop" className="shadow-[0_16px_40px_-12px_rgba(8,8,8,0.45)]">Get the Book · {CONFIG.price} <Arr /></Cta>
       </div>
 
       {/* STICKY MOBILE BUY BAR */}
       <div className={`fixed inset-x-3 bottom-3 z-40 flex items-center justify-between gap-3 rounded-2xl bg-[#080808]/95 px-4 py-3 text-white shadow-[0_20px_50px_-15px_rgba(8,8,8,0.7)] backdrop-blur transition-transform duration-300 md:hidden ${sticky ? "translate-y-0" : "translate-y-[150%]"}`}>
         <div><p className="f-d"><span className="inline-block bg-[#FFE500] px-1.5 text-3xl text-[#080808]">{CONFIG.price}</span></p><p className="mt-1 text-[11px] text-[#B8B8B8]">One-time purchase · Digital PDF</p></div>
-        <Cta tone="dark" className="!min-h-11 !px-5 !py-2 !text-xs">Get the Book</Cta>
+        <Cta data-tracking-location="sticky_mobile" tone="dark" className="!min-h-11 !px-5 !py-2 !text-xs">Get the Book</Cta>
       </div>
     </div>
   );
