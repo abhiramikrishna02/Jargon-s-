@@ -21,8 +21,15 @@ test("blocks localhost and loopback hosts even if configured", () => {
   }
 });
 
-test("blocks Vercel deployment hostnames even if configured", () => {
-  for (const hostname of ["founderverse-git-main-team.vercel.app", "preview.vercel.app"]) {
+test("allows the confirmed Vercel production hostname only when explicitly configured", () => {
+  const productionVercelHostname = "founderverse2026.vercel.app";
+  assert.equal(isMetaPixelAllowed(productionVercelHostname), false);
+  assert.equal(isMetaPixelAllowed(productionVercelHostname, productionVercelHostname), true);
+  assert.equal(isMetaPixelAllowed(productionVercelHostname, "*.vercel.app"), false);
+});
+
+test("blocks all other Vercel preview hosts even if configured", () => {
+  for (const hostname of ["founderverse-git-main-team.vercel.app", "founderverse-preview-123.vercel.app", "preview.vercel.app"]) {
     assert.equal(isMetaPixelAllowed(hostname, hostname), false, hostname);
   }
 });
