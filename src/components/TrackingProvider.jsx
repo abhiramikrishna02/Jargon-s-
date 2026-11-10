@@ -2,9 +2,13 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { isMetaPixelAllowed } from "../lib/meta-pixel-environment.mjs";
 
 const PIXEL_ID = "2085787219477225";
 const CONSENT_KEY = "founderverse_optional_tracking_consent";
+// Set this to the exact production hostname(s), comma separated, in Vercel's
+// Production environment. An empty or missing value keeps Pixel tracking off.
+const PRODUCTION_HOSTNAME_ALLOWLIST = process.env.NEXT_PUBLIC_META_PIXEL_ALLOWED_HOSTNAMES || "";
 const TrackingContext = createContext(null);
 
 function getUtmParameters() {
@@ -19,6 +23,7 @@ function getUtmParameters() {
 
 function initializePixel() {
   if (typeof window === "undefined") return;
+  if (!isMetaPixelAllowed(window.location.hostname, PRODUCTION_HOSTNAME_ALLOWLIST)) return;
 
   const existing = window.fbq;
   if (existing?.__founderverseInitialized) return;
@@ -86,6 +91,7 @@ export function TrackingProvider({ children }) {
 
   const track = useCallback((eventName, parameters = {}, custom = false) => {
     if (consent !== "granted") return;
+    if (typeof window === "undefined" || !isMetaPixelAllowed(window.location.hostname, PRODUCTION_HOSTNAME_ALLOWLIST)) return;
     initializePixel();
     const fbq = window.fbq;
     if (typeof fbq !== "function") return;
@@ -95,6 +101,7 @@ export function TrackingProvider({ children }) {
 
   useEffect(() => {
     if (consent !== "granted" || !pathname || lastPageView.current === pathname) return;
+    if (!isMetaPixelAllowed(window.location.hostname, PRODUCTION_HOSTNAME_ALLOWLIST)) return;
     initializePixel();
     window.fbq("track", "PageView", utmParameters);
     lastPageView.current = pathname;
